@@ -71,20 +71,15 @@ def diff_deps(
     declared_deps: set[str],
 ) -> DependencyReport:
     resolved_internal_deps: set[str] = set()
-    unresolved_internal_modules: set[pym.PythonModule] = set()
-    for module in python_imported_deps.internal:
+    resolved_external_deps: set[br.Requirement] = set()
+    unresolved_modules: set[pym.PythonModule] = set()
+    for module in python_imported_deps.deps:
         if module in internal_module_index:
             resolved_internal_deps.add(internal_module_index[module])
-        else:
-            unresolved_internal_modules.add(module)
-
-    resolved_external_deps: set[br.Requirement] = set()
-    unresolved_external_modules: set[pym.PythonModule] = set()
-    for module in python_imported_deps.external:
-        if module in external_module_index:
+        elif module in external_module_index:
             resolved_external_deps.add(external_module_index[module])
         else:
-            unresolved_external_modules.add(module)
+            unresolved_modules.add(module)
 
     all_resolved_deps = set(
         [str(d) for d in resolved_internal_deps]
@@ -93,7 +88,6 @@ def diff_deps(
     extra_deps = declared_deps - runtime_deps - all_resolved_deps
     missing_deps = all_resolved_deps - declared_deps
     used_runtime_deps = set.intersection(runtime_deps, all_resolved_deps)
-    unresolved_modules = unresolved_internal_modules.union(unresolved_external_modules)
 
     return DependencyReport(
         referenced_deps=all_resolved_deps,

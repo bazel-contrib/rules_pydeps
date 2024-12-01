@@ -1,17 +1,15 @@
-"""Tools for extracting dependency information from source files."""
+"Tools for extracting dependency information from source files."
 
 import dataclasses
 import pathlib
 import sys
-from typing import Final, override
+from typing import override
 
 import libcst as cst
 from libcst import helpers as h
 from libcst import metadata as cst_metadata
 
 from pydeps.private.py import python_module as pm
-
-_INTERNAL_BASE_MODULES: Final[frozenset[str]] = frozenset({"thm"})
 
 
 @dataclasses.dataclass(frozen=True)
@@ -22,11 +20,8 @@ class SourceFileDependencies:
     local: set[pm.PythonModule]
     """Dependencies that are in the root source tree and part of the current target."""
 
-    internal: set[pm.PythonModule]
-    """Dependencies that are in the root source tree but not part of the current target."""
-
-    external: set[pm.PythonModule]
-    """Dependencies that come from requirements."""
+    deps: set[pm.PythonModule]
+    """Dependencies of the current target."""
 
 
 class _ImportFinder(cst.BatchableMetadataProvider[str]):
@@ -90,25 +85,20 @@ def _allow_non_module_init_imports(
 
 def _to_sfd(imports: set[str], local: set[pm.PythonModule]) -> SourceFileDependencies:
     system_deps: set[pm.PythonModule] = set()
-    internal_deps: set[pm.PythonModule] = set()
-    external_deps: set[pm.PythonModule] = set()
+    deps: set[pm.PythonModule] = set()
 
     for dep in imports:
         mod = pm.PythonModule(dep)
         path = dep.split(".")
         if path[0] == "__future__" or path[0] in sys.stdlib_module_names:
             system_deps.add(mod)
-        elif path[0] in _INTERNAL_BASE_MODULES:
-            if mod not in local:
-                internal_deps.add(mod)
-        else:
-            external_deps.add(mod)
+        elif mod not in local:
+            deps.add(mod)
 
     return SourceFileDependencies(
         system=system_deps,
         local=local,
-        internal=internal_deps,
-        external=external_deps,
+        deps=deps,
     )
 
 
@@ -149,8 +139,7 @@ def get_dependencies(
         )
 
     system: set[pm.PythonModule] = set()
-    internal: set[pm.PythonModule] = set()
-    external: set[pm.PythonModule] = set()
+    deps: set[pm.PythonModule] = set()
 
     # all source files in the provided set are considered local
     # and we turn the files into a set of modules
@@ -159,9 +148,6 @@ def get_dependencies(
     for source in sources:
         sfd = _get_sfd_for_file(working_dir, source, local)
         system.update(sfd.system)
-        internal.update(sfd.internal)
-        external.update(sfd.external)
+        deps.update(sfd.deps)
 
-    return SourceFileDependencies(
-        system=system, local=local, internal=internal, external=external
-    )
+    return SourceFileDependencies(system=system, local=local, deps=deps)

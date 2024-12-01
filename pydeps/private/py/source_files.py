@@ -21,7 +21,7 @@ class SourceFileDependencies:
     """Dependencies that are in the root source tree and part of the current target."""
 
     deps: set[pm.PythonModule]
-    """Dependencies referenced by these sources."""
+    """Dependencies referenced by source files."""
 
 
 class _ImportFinder(cst.BatchableMetadataProvider[str]):

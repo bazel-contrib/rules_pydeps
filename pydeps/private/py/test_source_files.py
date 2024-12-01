@@ -22,10 +22,9 @@ def test__get_sfd_for_str__extracts_imports() -> None:
         set(),
     )
 
-    assert sfd.external == {
+    assert sfd.deps == {
         pm.PythonModule("foo"),
         pm.PythonModule("foo.bar"),
         pm.PythonModule("foo.baz"),
+        pm.PythonModule("thm.foo"),
     }
-
-    assert sfd.internal == {pm.PythonModule("thm.foo")}

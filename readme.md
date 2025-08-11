@@ -13,7 +13,7 @@ Presently, only bzlmod setup is supported.
 **Add rules_pydeps to your MODULE.bazel:**
 
 ```starlark
-bazel_dep(name = "rules_pydeps", version = "0.0.0")
+bazel_dep(name = "rules_pydeps", version = "0.4.0")
 ```
 
 **Configure the external deps analyzer:**

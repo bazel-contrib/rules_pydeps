@@ -21,7 +21,7 @@ bazel_dep(name = "rules_pydeps", version = "0.0.0")
 ```starlark
 reqs = use_extension("@rules_pydeps//pydeps:reqs.bzl", "reqs")
 reqs.requirements(
-    requirements_in = "//:requirements.in",
+    requirements_txt = "//:requirements.txt",
     pip_requirements = "@pip//:requirements.bzl",
 )
 use_repo(reqs, "reqs")

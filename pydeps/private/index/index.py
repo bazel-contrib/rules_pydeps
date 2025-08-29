@@ -76,7 +76,13 @@ def index(
         if _filter_dep_file(file):
             continue
 
-        mod = pm.PythonModule.from_path(pathlib.Path(file))
+        try:
+            mod = pm.PythonModule.from_path(pathlib.Path(file))
+        except ValueError as ve:
+            COLOR_PURPLE = "\033[35m"
+            COLOR_RESET = "\033[0m"
+            print(f"{COLOR_PURPLE}WARNING:{COLOR_RESET} {ve}")
+            continue
         req = _normalize_dep(dep)
 
         if mod in _IGNORE_MODULES:

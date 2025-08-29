@@ -43,10 +43,10 @@ Update your `.bazelrc` to include this new aspect:
 
 ```starlark
 # register deps_enforcer aspect with Bazel
-build --aspects //tools:aspects.bzl%deps_enforcer
+common --aspects //tools:aspects.bzl%deps_enforcer
 
 # optionally, default enable enforcement
-build --output_groups=+pydeps
+common --output_groups=+pydeps
 ```
 
 ## Skipping Targets

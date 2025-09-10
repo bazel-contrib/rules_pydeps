@@ -39,6 +39,6 @@ use_repo(pip, "pip")
 reqs = use_extension("@rules_pydeps//pydeps:reqs.bzl", "reqs")
 reqs.requirements(
     pip_requirements = "@pip//:requirements.bzl",
-    requirements_in = "//:requirements.in",
+    requirements_txt = "//:requirements.txt",
 )
 use_repo(reqs, "reqs")

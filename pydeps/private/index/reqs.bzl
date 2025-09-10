@@ -1,4 +1,4 @@
-"Read requirements.in and produce a repository with a variable that contains just the input requirements."
+"Read requirements.txt and produce a repository with a variable that contains just the input requirements."
 
 def _format_pins(pins):
     return "\n".join(["    \"{pin}\",".format(pin = pin) for pin in pins])
@@ -40,7 +40,7 @@ def _in_impl(rctx):
         "{{types}}": _format_pins(types),
     })
 
-requirements_in = repository_rule(
+requirements_txt = repository_rule(
     attrs = {
         "files": attr.label_list(mandatory = True, allow_files = True),
         "pip_requirements": attr.label(mandatory = True),

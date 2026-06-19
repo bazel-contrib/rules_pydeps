@@ -1,6 +1,6 @@
 "pytest macro"
 
-load("@python_versions//3.12:defs.bzl", "py_test")
+load("@python_versions//3.13:defs.bzl", "py_test")
 
 _TEST_RUNNER_ENTRYPOINT = "//pydeps/private/pytest:runner.py"
 

@@ -4,6 +4,7 @@ load("//pydeps/private/pytest:pytest.bzl", "pytest_test")
 
 py_library(
     name = "py",
+    imports = ["../../.."],
     srcs = glob(
         include = ["*.py"],
         exclude = ["test_*.py"],

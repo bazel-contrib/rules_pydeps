@@ -1,8 +1,8 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@python_versions//3.12:defs.bzl", py_312_binary = "py_binary")
+load("@python_versions//3.13:defs.bzl", py_313_binary = "py_binary")
 load("@rules_pydeps_pip//:requirements.bzl", "requirement")
 
-py_312_binary(
+py_313_binary(
     name = "deps_cli",
     srcs = glob(
         include = ["*.py"],

@@ -4,7 +4,6 @@ load("//pydeps/private/pytest:pytest.bzl", "pytest_test")
 
 py_library(
     name = "py",
-    imports = ["../../.."], # support rules_python 1.7.0 bootstrapping
     srcs = glob(
         include = ["*.py"],
         exclude = ["test_*.py"],

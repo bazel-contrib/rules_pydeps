@@ -49,6 +49,19 @@ common --aspects //tools:aspects.bzl%deps_enforcer
 common --output_groups=+pydeps
 ```
 
+Alternatively, you can construct the aspect to become a validation action:
+```starlark
+load("@rules_pydeps//pydeps:pydeps.bzl", "deps_enforcer_aspect_factory")
+
+deps_enforcer = deps_enforcer_aspect_factory(
+    pip_deps_index = Label("@reqs//:pip_deps_index"),
+    output_groups = ["_validation"],
+)
+```
+
+As a validation action you do not need to specify an extra output group, it
+is instead controlled by the `--run_validations` flag.
+
 ## Skipping Targets
 
 Label any target with the tag `no-deps-enforcer`, or customize suppression tags:

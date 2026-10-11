@@ -41,6 +41,11 @@ class PythonModule:
 
         return cls(".".join(module))
 
+    def ancestors(self) -> list["PythonModule"]:
+        "Return this module and each enclosing package, most specific first."
+        parts = self._module.split(".")
+        return [PythonModule(".".join(parts[:i])) for i in range(len(parts), 0, -1)]
+
     @override
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, PythonModule) and self._module == other._module

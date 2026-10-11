@@ -43,3 +43,12 @@ def test__str__is_module() -> None:
     assert (
         str(pm.PythonModule.from_path(pathlib.Path("foo/bar/baz.py"))) == "foo.bar.baz"
     )
+
+
+def test__ancestors__most_specific_first() -> None:
+    assert pm.PythonModule("a.b.c").ancestors() == [
+        pm.PythonModule("a.b.c"),
+        pm.PythonModule("a.b"),
+        pm.PythonModule("a"),
+    ]
+    assert pm.PythonModule("a").ancestors() == [pm.PythonModule("a")]

@@ -7,7 +7,6 @@ from typing import override
 
 import libcst as cst
 from libcst import helpers as h
-from libcst import metadata as cst_metadata
 
 from pydeps.private.py import python_module as pm
 
@@ -24,26 +23,34 @@ class SourceFileDependencies:
     """Dependencies referenced by source files."""
 
 
-class _ImportFinder(cst.BatchableMetadataProvider[str]):
-    METADATA_DEPENDENCIES = (cst_metadata.PositionProvider,)
-
-    def __init__(self) -> None:
+class _ImportFinder(cst.CSTVisitor):
+    def __init__(self, package: str) -> None:
         super().__init__()
+        self._package = package
+        self.imports: set[str] = set()
 
     @override
     def visit_Import(self, node: cst.Import) -> None:
         for name in node.names:
-            self.set_metadata(node, f"{h.get_full_name_for_node(name.name)}")
+            self.imports.add(f"{h.get_full_name_for_node(name.name)}")
 
     @override
     def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-        if not isinstance(node.names, cst.ImportStar):
+        base = h.get_full_name_for_node(node.module) if node.module else None
+        if node.relative:
+            parts = self._package.split(".") if self._package else []
+            parts = parts[: len(parts) - (len(node.relative) - 1)]
+            if base:
+                parts.append(base)
+            base = ".".join(parts)
+        if not base:
+            return
+
+        if isinstance(node.names, cst.ImportStar):
+            self.imports.add(base)
+        else:
             for name in node.names:
-                if node.module:
-                    self.set_metadata(
-                        node,
-                        f"{h.get_full_name_for_node(node.module)}.{name.name.value}",
-                    )
+                self.imports.add(f"{base}.{name.name.value}")
 
 
 def _allow_non_module_init_imports(
@@ -83,6 +90,14 @@ def _allow_non_module_init_imports(
     return adjusted_module_imports
 
 
+def _package_of(path: pathlib.Path) -> str:
+    "Return the package that relative imports in `path` are resolved against."
+    module = str(pm.PythonModule.from_path(path))
+    if path.name == "__init__.py":
+        return module
+    return module.rpartition(".")[0]
+
+
 def _to_sfd(imports: set[str], local: set[pm.PythonModule]) -> SourceFileDependencies:
     system_deps: set[pm.PythonModule] = set()
     deps: set[pm.PythonModule] = set()
@@ -92,7 +107,7 @@ def _to_sfd(imports: set[str], local: set[pm.PythonModule]) -> SourceFileDepende
         path = dep.split(".")
         if path[0] == "__future__" or path[0] in sys.stdlib_module_names:
             system_deps.add(mod)
-        elif mod not in local:
+        elif not any(ancestor in local for ancestor in mod.ancestors()):
             deps.add(mod)
 
     return SourceFileDependencies(
@@ -105,9 +120,9 @@ def _to_sfd(imports: set[str], local: set[pm.PythonModule]) -> SourceFileDepende
 def _get_sfd_for_str(
     content: str, path: pathlib.Path, local: set[pm.PythonModule]
 ) -> SourceFileDependencies:
-    wrapper = cst.MetadataWrapper(cst.parse_module(content))
-    imports = set(wrapper.resolve(_ImportFinder).values())
-    imports = _allow_non_module_init_imports(path, imports)
+    finder = _ImportFinder(_package_of(path))
+    cst.parse_module(content).visit(finder)
+    imports = _allow_non_module_init_imports(path, finder.imports)
     return _to_sfd(imports, local)
 
 

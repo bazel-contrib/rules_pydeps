@@ -1,6 +1,6 @@
 "Implement a deps/bazel consistency checking aspect."
 
-load("@rules_python//python:py_info.bzl", RulesPythonPyInfo = "PyInfo")
+load("@rules_python//python:py_info.bzl", "PyInfo")
 
 _EMPTY_DEPSET = depset()
 
@@ -94,7 +94,7 @@ def _deps_aspect_impl(target, ctx):
         if dep.label.name in ctx.attr._ignored_names:
             continue
 
-        if PyInfo in dep or RulesPythonPyInfo in dep:
+        if PyInfo in dep:
             dep_str = str(dep.label)
             referenced_deps.append(dep_str)
 

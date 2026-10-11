@@ -1,6 +1,6 @@
 "Rules to build a module index for rules_python pip deps."
 
-load("@rules_python//python:py_info.bzl", RulesPythonPyInfo = "PyInfo")
+load("@rules_python//python:py_info.bzl", "PyInfo")
 
 def _map_dependency_file(item):
     file = item[0]
@@ -19,7 +19,7 @@ def _deps_index_impl(ctx):
     modules = {}
     dependency_files = {}
     for dep, module in ctx.attr.label_to_requirement.items():
-        if PyInfo in dep or RulesPythonPyInfo in dep:
+        if PyInfo in dep:
             modules[dep.label] = module
 
             for file in dep.files.to_list():

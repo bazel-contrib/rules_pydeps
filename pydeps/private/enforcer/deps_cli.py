@@ -74,10 +74,15 @@ def diff_deps(
     resolved_external_deps: set[br.Requirement] = set()
     unresolved_modules: set[pym.PythonModule] = set()
     for module in python_imported_deps.deps:
-        if module in internal_module_index:
-            resolved_internal_deps.add(internal_module_index[module])
-        elif module in external_module_index:
-            resolved_external_deps.add(external_module_index[module])
+        for candidate in module.ancestors():
+            if candidate in python_imported_deps.local:
+                break
+            if candidate in internal_module_index:
+                resolved_internal_deps.add(internal_module_index[candidate])
+                break
+            if candidate in external_module_index:
+                resolved_external_deps.add(external_module_index[candidate])
+                break
         else:
             unresolved_modules.add(module)
 
